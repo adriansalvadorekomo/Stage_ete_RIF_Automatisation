@@ -95,3 +95,62 @@ variable "haythem_bastion_port" {
   description = "Port Neutron de Bastion_TDP"
   type        = string
 }
+
+
+# ============================================================
+# Bastion HA - Secondary / Backup
+# ============================================================
+
+variable "bastion_secondary_name" {
+  description = "Nom du Bastion secondaire HA"
+  type        = string
+  default     = "bastion-nawel-backup"
+}
+
+variable "bastion_secondary_ip" {
+  description = "Adresse IP privée fixe du Bastion secondaire"
+  type        = string
+}
+
+variable "bastion_vip" {
+  description = "VIP privée utilisée ultérieurement par Keepalived"
+  type        = string
+}
+
+# ============================================================
+# Projet OpenStack du cluster Bastion HA
+# ============================================================
+
+variable "bastion_project_name" {
+  description = "Nom du projet OpenStack contenant les Bastions HA"
+  type        = string
+  default     = "stagiaires-ete-2026"
+}
+
+variable "bastion_project_id" {
+  description = "ID du projet OpenStack contenant les Bastions HA"
+  type        = string
+  default     = "e553cc57c1a545e78542028045d7ed63"
+}
+
+# ============================================================
+# SSH / Keypair du Bastion HA
+# ============================================================
+
+variable "bastion_secondary_keypair_name" {
+  description = "Nom du keypair OpenStack créé pour le Bastion secondaire"
+  type        = string
+  default     = "bastion-ha-key"
+}
+
+variable "bastion_ha_public_key" {
+  description = "Clé publique SSH importée dans le keypair du Bastion HA"
+  type        = string
+  sensitive   = true
+}
+
+variable "bastion_primary_ip" {
+  description = "IP privée du Bastion principal"
+  type        = string
+  default     = "192.168.100.111"
+}

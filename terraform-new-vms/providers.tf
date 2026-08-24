@@ -32,7 +32,7 @@ provider "openstack" {
     identity = "http://127.0.0.1:5000/v3/"
     compute  = "http://127.0.0.1:8774/v2.1/"
     network  = "http://127.0.0.1:9696/v2.0/"
-    image    = "http://127.0.0.1:9292/v2/"
+    image    = "http://127.0.0.1:19292/v2/"
     volumev3 = "http://127.0.0.1:8776/v3/"
   }
 }

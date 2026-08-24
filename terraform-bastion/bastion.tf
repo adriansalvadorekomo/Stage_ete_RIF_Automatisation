@@ -10,6 +10,10 @@ resource "openstack_networking_port_v2" "bastion" {
   fixed_ip {
     subnet_id = data.openstack_networking_subnet_v2.private.id
   }
+  # VIP HA autorisée sur le Bastion principal
+  allowed_address_pairs {
+    ip_address = var.bastion_vip
+  }
 
   lifecycle {
     prevent_destroy = true

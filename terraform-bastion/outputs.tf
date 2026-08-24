@@ -40,3 +40,28 @@ output "ssh_haythem_bastion_tdp" {
   description = "SSH vers Bastion_TDP via bastion-nawel-test"
   value       = "ssh -J ubuntu@${var.bastion_floating_ip} ubuntu@192.168.100.40"
 }
+
+
+# ============================================================
+# Bastion HA
+# ============================================================
+
+output "bastion_secondary_private_ip" {
+  description = "Adresse IP privée du Bastion secondaire"
+  value       = openstack_networking_port_v2.bastion_secondary.all_fixed_ips[0]
+}
+
+output "bastion_ha_vip" {
+  description = "Future VIP privée du cluster Bastion HA"
+  value       = var.bastion_vip
+}
+
+output "bastion_ha_keypair_name" {
+  description = "Nom du keypair SSH créé pour le Bastion secondaire"
+  value       = openstack_compute_keypair_v2.bastion_ha.name
+}
+
+output "ssh_bastion_secondary_via_primary" {
+  description = "Connexion SSH vers le Bastion secondaire via le Bastion principal"
+  value       = "ssh -J ubuntu@${var.bastion_floating_ip} ubuntu@${var.bastion_secondary_ip}"
+}

@@ -104,3 +104,28 @@ resource "openstack_networking_secgroup_rule_v2" "haythem_icmp_from_central_bast
   remote_ip_prefix  = "192.168.100.111/32"
   security_group_id = openstack_networking_secgroup_v2.haythem_from_central_bastion.id
 }
+
+# Keepalived utilise VRRP pour que les deux nœuds s'échangent des annonces de disponibilité.
+
+# VRRP n'utilise ni TCP ni UDP. C'est directement le protocole IP numéro 112.
+
+#Primary → Backup
+resource "openstack_networking_secgroup_rule_v2" "bastion_vrrp_from_primary" {
+  description       = "VRRP HA depuis le Bastion principal"
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "112"
+  remote_ip_prefix  = "${var.bastion_primary_ip}/32"
+  security_group_id = openstack_networking_secgroup_v2.bastion.id
+}
+
+#Backup → Primary
+
+resource "openstack_networking_secgroup_rule_v2" "bastion_vrrp_from_secondary" {
+  description       = "VRRP HA depuis le Bastion secondaire"
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "112"
+  remote_ip_prefix  = "${var.bastion_secondary_ip}/32"
+  security_group_id = openstack_networking_secgroup_v2.bastion.id
+}

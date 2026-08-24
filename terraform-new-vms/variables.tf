@@ -92,3 +92,4 @@ variable "ssh_user" {
   default     = "ubuntu"
 }
 
+
