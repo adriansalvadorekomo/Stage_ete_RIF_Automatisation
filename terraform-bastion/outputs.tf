@@ -41,6 +41,16 @@ output "ssh_haythem_bastion_tdp" {
   value       = "ssh -J ubuntu@${var.bastion_floating_ip} ubuntu@192.168.100.40"
 }
 
+/*
+# ============================================================
+# Accès SSH - Projet Hadil
+# ============================================================
+
+output "ssh_pfe_hadil" {
+  description = "SSH vers pfe-hadil via le Bastion HA"
+  value       = "ssh -J ubuntu@${var.bastion_floating_ip} ubuntu@192.168.100.78"
+}
+*/
 
 # ============================================================
 # Bastion HA

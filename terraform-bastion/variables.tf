@@ -96,6 +96,28 @@ variable "haythem_bastion_port" {
   type        = string
 }
 
+# ============================================================
+# Projet OpenStack Hadil
+# ============================================================
+
+/*
+variable "hadil_project_name" {
+  description = "Nom du projet OpenStack de Hadil"
+  type        = string
+}
+
+variable "hadil_project_id" {
+  description = "ID du projet OpenStack de Hadil"
+  type        = string
+  default     = "32e722df7c8249d681f07aaac2d7c449"
+}
+
+variable "hadil_vm_port" {
+  description = "Port Neutron de la VM pfe-hadil"
+  type        = string
+}
+*/
+
 
 # ============================================================
 # Bastion HA - Secondary / Backup

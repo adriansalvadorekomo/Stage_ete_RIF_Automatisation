@@ -105,6 +105,57 @@ resource "openstack_networking_secgroup_rule_v2" "haythem_icmp_from_central_bast
   security_group_id = openstack_networking_secgroup_v2.haythem_from_central_bastion.id
 }
 
+/*
+# ============================================================
+# Security Group - Projet Hadil
+# Bastion HA -> pfe-hadil
+# ============================================================
+
+resource "openstack_networking_secgroup_v2" "hadil_from_central_bastion" {
+  provider = openstack.hadil
+
+  name                 = "sg-hadil-from-bastion-nawel"
+  description          = "Autorise pfe-hadil depuis les Bastions HA Nawel"
+  delete_default_rules = false
+}
+
+# SSH depuis PRIMARY .111 et BACKUP .112
+resource "openstack_networking_secgroup_rule_v2" "hadil_ssh_from_bastion" {
+  provider = openstack.hadil
+
+  for_each = toset([
+    var.bastion_primary_ip,
+    var.bastion_secondary_ip
+  ])
+
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 22
+  port_range_max    = 22
+  remote_ip_prefix  = "${each.value}/32"
+  security_group_id = openstack_networking_secgroup_v2.hadil_from_central_bastion.id
+}
+
+# ICMP pour les tests réseau
+resource "openstack_networking_secgroup_rule_v2" "hadil_icmp_from_bastion" {
+  provider = openstack.hadil
+
+  for_each = toset([
+    var.bastion_primary_ip,
+    var.bastion_secondary_ip
+  ])
+
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  protocol          = "icmp"
+  remote_ip_prefix  = "${each.value}/32"
+  security_group_id = openstack_networking_secgroup_v2.hadil_from_central_bastion.id
+}
+*/
+
+
+
 # Keepalived utilise VRRP pour que les deux nœuds s'échangent des annonces de disponibilité.
 
 # VRRP n'utilise ni TCP ni UDP. C'est directement le protocole IP numéro 112.

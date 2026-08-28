@@ -26,3 +26,23 @@ resource "openstack_networking_port_secgroup_associate_v2" "haythem_bastion_tdp"
 
   enforce = false
 }
+
+# ============================================================
+# Migration progressive de pfe-hadil vers le Bastion HA
+# ============================================================
+
+/*
+resource "openstack_networking_port_secgroup_associate_v2" "hadil_via_bastion" {
+  provider = openstack.hadil
+
+  port_id = var.hadil_vm_port
+
+  security_group_ids = [
+    openstack_networking_secgroup_v2.hadil_from_central_bastion.id
+  ]
+
+  # IMPORTANT :
+  # conserve sovereignops-hadil-sg pendant les tests.
+  enforce = false
+}
+*/
