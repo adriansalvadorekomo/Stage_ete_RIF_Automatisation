@@ -1,99 +1,110 @@
 # HA Bastion on OpenStack — architecture (D2 source)
 # Render: d2 docs/architecture.d2 docs/architecture.svg
-# Also see docs/architecture.dot (Graphviz equivalent).
+# Also see docs/architecture.dot (Graphviz).
 
-direction: down
+direction: right
 
-classes: {
-  net: {
+Internet: {
+  internet: "Internet" {
     style: {
       fill: "#E8EEF7"
       stroke: "#4169E1"
-      border-radius: 8
     }
   }
-  ha: {
+
+  fip: "Floating IP\n188.40.148.152" {
+    style: {
+      fill: "#E8EEF7"
+      stroke: "#4169E1"
+    }
+  }
+
+  internet -> fip: HTTPS/SSH
+}
+
+"HA Bastion": {
+  direction: right
+
+  primary: "PRIMARY Bastion\n192.168.100.111 · MASTER" {
     style: {
       fill: "#FDECEA"
-      stroke: "#EE4C2C"
-      border-radius: 8
+      stroke: "#FF3621"
     }
   }
-  vm: {
+
+  backup: "BACKUP Bastion\n192.168.100.112 · BACKUP" {
+    style: {
+      fill: "#FDECEA"
+      stroke: "#FF3621"
+    }
+  }
+
+  vip: "Keepalived VIP\n192.168.100.113" {
+    style: {
+      fill: "#FDECEA"
+      stroke: "#FF3621"
+    }
+  }
+
+  primary -> vip: VRRP
+  backup -> vip: VRRP
+}
+
+"Private Network": {
+  privnet: "Private OpenStack network" {
     style: {
       fill: "#E6F4EA"
       stroke: "#1A7F37"
-      border-radius: 8
     }
   }
-  ops: {
+
+  proxy: "Nginx reverse proxy\nDuckDNS + HTTPS" {
+    style: {
+      fill: "#E6F4EA"
+      stroke: "#1A7F37"
+    }
+  }
+
+  privnet -> proxy: forward
+}
+
+Applications: {
+  openedx: "Open edX (Tutor)\nrif-openedx.duckdns.org" {
+    style: {
+      fill: "#E6F4EA"
+      stroke: "#1A7F37"
+    }
+  }
+
+  apps: "Private VMs\nFullStack · JavaJS · Odoo" {
+    style: {
+      fill: "#E6F4EA"
+      stroke: "#1A7F37"
+    }
+  }
+}
+
+Automation: {
+  terraform: "Terraform\nVMs · networks · FIPs · security groups" {
     style: {
       fill: "#F3EAF7"
       stroke: "#7B42BC"
-      border-radius: 8
+    }
+  }
+
+  ansible: "Ansible\nDocker · UFW · reverse proxy" {
+    style: {
+      fill: "#F3EAF7"
+      stroke: "#7B42BC"
     }
   }
 }
 
-internet: "Internet" {
-  class: net
-}
-fip: "Floating IP\n188.40.148.152" {
-  class: net
-}
-primary: "PRIMARY Bastion\n192.168.100.111 · MASTER" {
-  class: ha
-}
-backup: "BACKUP Bastion\n192.168.100.112 · BACKUP" {
-  class: ha
-}
-vip: "Keepalived VIP\n192.168.100.113" {
-  class: ha
-}
-privnet: "Private OpenStack network" {
-  class: net
-}
-proxy: "Nginx reverse proxy\nDuckDNS + HTTPS" {
-  class: vm
-}
-openedx: "Open edX (Tutor)\nrif-openedx.duckdns.org" {
-  class: vm
-}
-apps: "Private VMs\nFullStack · JavaJS · Odoo" {
-  class: vm
-}
-terraform: "Terraform\nVMs · networks · FIPs · security groups" {
-  class: ops
-}
-ansible: "Ansible\nDocker · UFW · reverse proxy" {
-  class: ops
-}
-
-internet -> fip: HTTPS/SSH
-fip -> primary: active
-fip -> backup: on failover (~5s) {
-  style: {
-    stroke-dash: 4
-  }
-}
-primary -> vip: VRRP
-backup -> vip: VRRP
-vip -> privnet: route
-privnet -> proxy: forward
-proxy -> openedx: vhost
-proxy -> apps: vhosts
-terraform -> primary: provisions {
-  style: {
-    stroke-dash: 4
-  }
-}
-terraform -> apps: provisions {
-  style: {
-    stroke-dash: 4
-  }
-}
-ansible -> proxy: configures {
-  style: {
-    stroke-dash: 4
-  }
-}
+Internet.fip -> "HA Bastion".primary: active
+Internet.fip -> "HA Bastion".backup: on failover (~5s)
+"HA Bastion".vip -> "Private Network".privnet: route
+"Private Network".proxy -> Applications.openedx: vhost
+"Private Network".proxy -> Applications.apps: vhosts
+Automation.terraform -> "HA Bastion".primary: provisions
+Automation.terraform -> Applications.apps: provisions
+Automation.ansible -> "Private Network".proxy: configures
