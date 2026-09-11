@@ -1,0 +1,49 @@
+// HA Bastion on OpenStack — architecture (Graphviz source)
+// Render: dot -Tsvg docs/architecture.dot -o docs/architecture-gv.svg
+// Also see docs/architecture.d2 (D2 equivalent, rendered as docs/architecture.svg).
+
+digraph bastion_ha {
+  rankdir=TB;
+  splines=ortho;
+  nodesep=0.5;
+  ranksep=0.7;
+  fontname="Helvetica";
+  node [fontname="Helvetica" fontsize=11 style="filled,rounded" shape=box];
+  edge [fontname="Helvetica" fontsize=10];
+
+  internet [label="Internet"
+            fillcolor="#E8EEF7" color="#4169E1" penwidth=2];
+  fip      [label="Floating IP\n188.40.148.152"
+            fillcolor="#E8EEF7" color="#4169E1" penwidth=2];
+  primary  [label="PRIMARY Bastion\n192.168.100.111 · MASTER"
+            fillcolor="#FDECEA" color="#EE4C2C" penwidth=2];
+  backup   [label="BACKUP Bastion\n192.168.100.112 · BACKUP"
+            fillcolor="#FDECEA" color="#EE4C2C" penwidth=2];
+  vip      [label="Keepalived VIP\n192.168.100.113"
+            fillcolor="#FDECEA" color="#EE4C2C" penwidth=3 shape=diamond];
+  privnet  [label="Private OpenStack network"
+            fillcolor="#E8EEF7" color="#4169E1" penwidth=2];
+  proxy    [label="Nginx reverse proxy\nDuckDNS + HTTPS"
+            fillcolor="#E6F4EA" color="#1A7F37" penwidth=2];
+  openedx  [label="Open edX (Tutor)\nrif-openedx.duckdns.org"
+            fillcolor="#E6F4EA" color="#1A7F37" penwidth=2];
+  apps     [label="Private VMs\nFullStack · JavaJS · Odoo"
+            fillcolor="#E6F4EA" color="#1A7F37" penwidth=2];
+  terraform [label="Terraform\nVMs · networks · FIPs · security groups"
+            fillcolor="#F3EAF7" color="#7B42BC" penwidth=2 shape=folder];
+  ansible  [label="Ansible\nDocker · UFW · reverse proxy"
+            fillcolor="#F3EAF7" color="#7B42BC" penwidth=2 shape=folder];
+
+  internet -> fip [label="HTTPS/SSH"];
+  fip -> primary [label="active"];
+  fip -> backup [label="on failover (~5s)" style=dashed];
+  primary -> vip [label="VRRP"];
+  backup -> vip [label="VRRP"];
+  vip -> privnet [label="route"];
+  privnet -> proxy [label="forward"];
+  proxy -> openedx [label="vhost"];
+  proxy -> apps [label="vhosts"];
+  terraform -> primary [label="provisions" style=dashed];
+  terraform -> apps [label="provisions" style=dashed];
+  ansible -> proxy [label="configures" style=dashed];
+}

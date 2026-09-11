@@ -1,0 +1,99 @@
+# HA Bastion on OpenStack — architecture (D2 source)
+# Render: d2 docs/architecture.d2 docs/architecture.svg
+# Also see docs/architecture.dot (Graphviz equivalent).
+
+direction: down
+
+classes: {
+  net: {
+    style: {
+      fill: "#E8EEF7"
+      stroke: "#4169E1"
+      border-radius: 8
+    }
+  }
+  ha: {
+    style: {
+      fill: "#FDECEA"
+      stroke: "#EE4C2C"
+      border-radius: 8
+    }
+  }
+  vm: {
+    style: {
+      fill: "#E6F4EA"
+      stroke: "#1A7F37"
+      border-radius: 8
+    }
+  }
+  ops: {
+    style: {
+      fill: "#F3EAF7"
+      stroke: "#7B42BC"
+      border-radius: 8
+    }
+  }
+}
+
+internet: "Internet" {
+  class: net
+}
+fip: "Floating IP\n188.40.148.152" {
+  class: net
+}
+primary: "PRIMARY Bastion\n192.168.100.111 · MASTER" {
+  class: ha
+}
+backup: "BACKUP Bastion\n192.168.100.112 · BACKUP" {
+  class: ha
+}
+vip: "Keepalived VIP\n192.168.100.113" {
+  class: ha
+}
+privnet: "Private OpenStack network" {
+  class: net
+}
+proxy: "Nginx reverse proxy\nDuckDNS + HTTPS" {
+  class: vm
+}
+openedx: "Open edX (Tutor)\nrif-openedx.duckdns.org" {
+  class: vm
+}
+apps: "Private VMs\nFullStack · JavaJS · Odoo" {
+  class: vm
+}
+terraform: "Terraform\nVMs · networks · FIPs · security groups" {
+  class: ops
+}
+ansible: "Ansible\nDocker · UFW · reverse proxy" {
+  class: ops
+}
+
+internet -> fip: HTTPS/SSH
+fip -> primary: active
+fip -> backup: on failover (~5s) {
+  style: {
+    stroke-dash: 4
+  }
+}
+primary -> vip: VRRP
+backup -> vip: VRRP
+vip -> privnet: route
+privnet -> proxy: forward
+proxy -> openedx: vhost
+proxy -> apps: vhosts
+terraform -> primary: provisions {
+  style: {
+    stroke-dash: 4
+  }
+}
+terraform -> apps: provisions {
+  style: {
+    stroke-dash: 4
+  }
+}
+ansible -> proxy: configures {
+  style: {
+    stroke-dash: 4
+  }
+}

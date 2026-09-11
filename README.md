@@ -1,6 +1,16 @@
-Voici une version anglaise, prête à copier directement dans `README.md` sur GitHub.
-
 # OpenStack HA Bastion Infrastructure
+
+<p>
+  <img src="https://img.shields.io/badge/OpenStack-ED1944?style=flat&logo=openstack&logoColor=white" />
+  <img src="https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white" />
+  <img src="https://img.shields.io/badge/Ansible-EE0000?style=flat&logo=ansible&logoColor=white" />
+  <img src="https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" />
+</p>
+
+> DevOps internship build: Terraform provisioning and Ansible configuration of
+> Open edX on OpenStack, fronted by an HA Bastion on a single Floating IP with
+> validated PRIMARY→BACKUP failover in ~5s, served via Nginx/DuckDNS/HTTPS.
 
 ## 1. Project Overview
 
@@ -22,6 +32,67 @@ The main objectives are:
 ---
 
 ## 2. Architecture Overview
+
+![HA Bastion architecture](docs/architecture.svg)
+
+*One Floating IP fronts a Keepalived PRIMARY/BACKUP Bastion pair. Terraform
+provisions the infrastructure, Ansible configures it, and Nginx exposes private
+VMs (including Open edX) via DuckDNS/HTTPS.*
+
+<details>
+<summary><b>Diagram sources (D2 · Graphviz)</b></summary>
+
+- [`docs/architecture.d2`](docs/architecture.d2) — render with `d2 docs/architecture.d2 docs/architecture.svg`
+- [`docs/architecture.dot`](docs/architecture.dot) — render with `dot -Tsvg docs/architecture.dot -o docs/architecture-gv.svg`
+
+```d2
+direction: down
+
+internet: "Internet"
+fip: "Floating IP\n188.40.148.152"
+primary: "PRIMARY Bastion\n192.168.100.111 · MASTER"
+backup: "BACKUP Bastion\n192.168.100.112 · BACKUP"
+vip: "Keepalived VIP\n192.168.100.113"
+privnet: "Private OpenStack network"
+proxy: "Nginx reverse proxy\nDuckDNS + HTTPS"
+openedx: "Open edX (Tutor)\nrif-openedx.duckdns.org"
+apps: "Private VMs\nFullStack · JavaJS · Odoo"
+terraform: "Terraform\nVMs · networks · FIPs · security groups"
+ansible: "Ansible\nDocker · UFW · reverse proxy"
+
+internet -> fip: HTTPS/SSH
+fip -> primary: active
+fip -> backup: on failover (~5s)
+primary -> vip: VRRP
+backup -> vip: VRRP
+vip -> privnet: route
+privnet -> proxy: forward
+proxy -> openedx: vhost
+proxy -> apps: vhosts
+terraform -> primary: provisions
+terraform -> apps: provisions
+ansible -> proxy: configures
+```
+
+```dot
+digraph bastion_ha {
+  rankdir=TB;
+  internet -> fip [label="HTTPS/SSH"];
+  fip -> primary [label="active"];
+  fip -> backup [label="on failover (~5s)" style=dashed];
+  primary -> vip [label="VRRP"];
+  backup -> vip [label="VRRP"];
+  vip -> privnet [label="route"];
+  privnet -> proxy [label="forward"];
+  proxy -> openedx [label="vhost"];
+  proxy -> apps [label="vhosts"];
+  terraform -> primary [style=dashed];
+  terraform -> apps [style=dashed];
+  ansible -> proxy [style=dashed];
+}
+```
+
+</details>
 
 The infrastructure uses two Bastion servers:
 
