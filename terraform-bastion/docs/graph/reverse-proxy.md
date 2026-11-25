@@ -36,7 +36,7 @@
 ### Traffic flow
 
 ```
-Internet ── tcp/80,443 ─▶ INFRA-FIP (188.40.148.152) ─▶ VM-BASTION : Nginx
+Internet ── tcp/80,443 ─▶ INFRA-FIP (<FLOATING_IP>) ─▶ VM-BASTION : Nginx
                                                               │ proxy_pass (private net)
                                                               ├▶ VM-JAVA-JS 192.168.100.149:80
                                                               │   (frontend container → Spring API interne)
@@ -87,8 +87,8 @@ Internet ── tcp/80,443 ─▶ INFRA-FIP (188.40.148.152) ─▶ VM-BASTION :
   On a fresh run the role first deploys the HTTP-only vhost, issues the cert, then
   re-deploys the vhost with TLS (two-phase), all in one playbook run.
 - **DuckDNS:** record is pinned to the bastion *entrance* IP (`duckdns_ip`,
-  `188.40.148.152`) because the bastion's egress IP differs (FIP is DNAT-only, egress
-  is `195.201.169.165`) — auto-detection via `ip=` would point the record at the
+  `<FLOATING_IP>`) because the bastion's egress IP differs (FIP is DNAT-only, egress
+  is `<EGRESS_IP>`) — auto-detection via `ip=` would point the record at the
   wrong host. Cron `/opt/duckdns/update.sh` every 5 min keeps it in sync; the script
   now uses `--max-time/--retry` to survive the bastion's intermittent DNS drops.
 
@@ -109,7 +109,7 @@ Internet ── tcp/80,443 ─▶ INFRA-FIP (188.40.148.152) ─▶ VM-BASTION :
   template, certbot `certonly --webroot` only manages certificates).
 - **Files involved:** `ansible/roles/reverse_proxy/templates/reverse-proxy.conf.j2`,
   `ansible/group_vars/bastion.yml` (`reverse_proxy_*` variables).
-- **Commands:** `curl -H 'Host: rif-javajs.duckdns.org' http://188.40.148.152/reverse-proxy-health`;
+- **Commands:** `curl -H 'Host: rif-javajs.duckdns.org' http://<FLOATING_IP>/reverse-proxy-health`;
   `curl -I https://rif-javajs.duckdns.org`.
 - **Validation procedure:** `VAL-REVERSE-PROXY`; browser reaches the "Shadcn Admin"
   SPA over HTTPS; `/auth/authenticate` returns 401/403 (backend reachable, not the
@@ -143,7 +143,7 @@ Internet ── tcp/80,443 ─▶ INFRA-FIP (188.40.148.152) ─▶ VM-BASTION :
   public DNS (DuckDNS record → `INFRA-FIP`, kept in sync by the role's cron).
 - **Files involved:** `ansible/roles/reverse_proxy/templates/reverse-proxy.conf.j2`,
   `ansible/group_vars/bastion.yml` (`reverse_proxy_*` variables).
-- **Commands:** `curl -H 'Host: rif-fullstack.duckdns.org' http://188.40.148.152/reverse-proxy-health`;
+- **Commands:** `curl -H 'Host: rif-fullstack.duckdns.org' http://<FLOATING_IP>/reverse-proxy-health`;
   `curl -I https://rif-fullstack.duckdns.org`.
 - **Validation procedure:** `VAL-REVERSE-PROXY`; browser reaches the "MatchJob" SPA
   over HTTPS; `/api/auth/login` → 400/401 JSON (backend proxied, not SPA fallback).
@@ -181,13 +181,13 @@ Internet ── tcp/80,443 ─▶ INFRA-FIP (188.40.148.152) ─▶ VM-BASTION :
 - **Files involved:** `ansible/roles/reverse_proxy/templates/reverse-proxy.conf.j2`,
   `ansible/group_vars/bastion.yml` (`reverse_proxy_sites`).
 - **Commands:** `curl -I https://rif-openedx.duckdns.org`;
-  `getent hosts rif-openedx.duckdns.org` (expect `188.40.148.152`).
+  `getent hosts rif-openedx.duckdns.org` (expect `<FLOATING_IP>`).
 - **Validation procedure:** `VAL-REVERSE-PROXY`; browser reaches the LMS sign-in
   page over HTTPS; Django `csrftoken`/`sessionid` cookies are issued with
   `Domain=rif-openedx.duckdns.org` (proves ALLOWED_HOSTS accepted the host).
 - **Runbook notes (2026-08-05):**
   - DuckDNS `rif-openedx.duckdns.org` previously pointed to the wrong IP
-    (`102.105.145.173`); corrected to the bastion `188.40.148.152` via the role's
+    (`102.105.145.173`); corrected to the bastion `<FLOATING_IP>` via the role's
     DuckDNS task/cron (now `domains=rif-fullstack,rif-javajs,rif-openedx`).
   - ACME issuance initially failed with `Network is unreachable`: the bastion has no
     IPv6 route and certbot 1.21 picks the AAAA record. Fixed persistently with

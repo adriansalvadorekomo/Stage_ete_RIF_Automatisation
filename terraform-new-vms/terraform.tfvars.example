@@ -1,0 +1,2 @@
+# Copier vers terraform.tfvars (gitignoré) et renseigner les valeurs réelles.
+bastion_floating_ip = "<FLOATING_IP>"

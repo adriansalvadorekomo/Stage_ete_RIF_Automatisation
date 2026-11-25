@@ -220,7 +220,7 @@ proceeding.
      `ansible/group_vars/bastion.yml`, re-run the same playbook. The role issues the
      cert (`certonly --webroot`, no nginx rewrite) and re-renders the vhost in TLS
      mode in the same run. `duckdns_ip` must equal the bastion's *entrance* IP
-     (`188.40.148.152`), not its egress IP.
+     (`<FLOATING_IP>`), not its egress IP.
 - **Validation:** `VAL-REVERSE-PROXY`.
 - **Risks:** a failed first run before handler flush can leave the vhost written but
   never reloaded — fixed in-role with `meta: flush_handlers` before validation;
@@ -251,9 +251,9 @@ proceeding.
 
 - **Purpose:** prove `RP-NGINX` serves correct backends per vhost (multi-vhost since 2026-08-04).
 - **Steps (from any machine):**
-  1. For each vhost: `curl -s -H 'Host: <vhost>' http://188.40.148.152/reverse-proxy-health`
+  1. For each vhost: `curl -s -H 'Host: <vhost>' http://<FLOATING_IP>/reverse-proxy-health`
      → `bastion-reverse-proxy-ok` (check `rif-javajs.duckdns.org` **and** `rif-fullstack.duckdns.org`).
-  2. `curl -sL -H 'Host: <vhost>' http://188.40.148.152/` → HTML of the SPA
+  2. `curl -sL -H 'Host: <vhost>' http://<FLOATING_IP>/` → HTML of the SPA
      (`rif-javajs` → `<title>Shadcn Admin</title>`; `rif-fullstack` → `<title>MatchJob …</title>`);
      over the public domain it first answers `301 → https`.
   3. `curl -s -o /dev/null -w '%{http_code}' https://rif-javajs.duckdns.org/auth/authenticate`

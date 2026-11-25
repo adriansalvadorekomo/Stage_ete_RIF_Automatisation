@@ -7,7 +7,8 @@
 # Infrastructure configuration
 # ------------------------------------------------------------
 
-$FloatingIP = "188.40.148.152"
+param([string]$FloatingIP = $env:BASTION_FLOATING_IP)
+if (-not $FloatingIP) { throw "Floating IP manquante : -FloatingIP <ip> ou `$env:BASTION_FLOATING_IP" }
 $PrimaryIP  = "192.168.100.111"
 $BackupIP   = "192.168.100.112"
 $VIP        = "192.168.100.113"
