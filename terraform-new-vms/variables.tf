@@ -81,9 +81,8 @@ variable "volume_size_gb" {
 }
 
 variable "bastion_floating_ip" {
-  description = "Floating IP du Bastion"
+  description = "Floating IP du Bastion (à fournir via terraform.tfvars, non versionné)"
   type        = string
-  default     = "188.40.148.152"
 }
 
 variable "ssh_user" {

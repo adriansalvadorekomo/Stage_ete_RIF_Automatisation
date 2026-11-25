@@ -49,7 +49,7 @@ VMs (including Open edX) via DuckDNS/HTTPS.*
 direction: down
 
 internet: "Internet"
-fip: "Floating IP\n188.40.148.152"
+fip: "Floating IP\n<FLOATING_IP>"
 primary: "PRIMARY Bastion\n192.168.100.111 · MASTER"
 backup: "BACKUP Bastion\n192.168.100.112 · BACKUP"
 vip: "Keepalived VIP\n192.168.100.113"
@@ -101,7 +101,7 @@ The infrastructure uses two Bastion servers:
                             |
                             |
                     Public Floating IP
-                     188.40.148.152
+                     <FLOATING_IP>
                             |
                             v
                     +---------------+
@@ -140,7 +140,7 @@ The Bastion Host provides a centralized and controlled entry point to private vi
 Users first connect to the Bastion:
 
 ```bash
-ssh ubuntu@188.40.148.152
+ssh ubuntu@<FLOATING_IP>
 ```
 
 Private VMs can then be reached through the Bastion.
@@ -148,7 +148,7 @@ Private VMs can then be reached through the Bastion.
 For example, SSH `ProxyJump` can be used:
 
 ```bash
-ssh -J ubuntu@188.40.148.152 ubuntu@PRIVATE_VM_IP
+ssh -J ubuntu@<FLOATING_IP> ubuntu@PRIVATE_VM_IP
 ```
 
 This architecture prevents private VMs from requiring their own public Floating IPs.
@@ -174,7 +174,7 @@ To solve this issue, a second Bastion was deployed.
 | Primary       | `bastion-nawel-test`   | `192.168.100.111` |
 | Backup        | `bastion-nawel-backup` | `192.168.100.112` |
 | Virtual IP    | Keepalived VIP         | `192.168.100.113` |
-| Public Access | Floating IP            | `188.40.148.152`  |
+| Public Access | Floating IP            | `<FLOATING_IP>`  |
 
 ---
 
@@ -185,7 +185,7 @@ To solve this issue, a second Bastion was deployed.
 Under normal conditions:
 
 ```text
-188.40.148.152
+<FLOATING_IP>
        |
        v
 192.168.100.111
@@ -221,7 +221,7 @@ BACKUP
       |
       v
 Floating IP
-188.40.148.152
+<FLOATING_IP>
 ```
 
 The Backup Bastion automatically becomes `MASTER`.
@@ -235,7 +235,7 @@ The public Floating IP is moved to:
 Users can continue using the same public IP:
 
 ```bash
-ssh ubuntu@188.40.148.152
+ssh ubuntu@<FLOATING_IP>
 ```
 
 Therefore, users do not need to know which Bastion is currently active.
@@ -261,7 +261,7 @@ The infrastructure automatically returns to its normal state.
 The current Floating IP association can be checked from the OpenStack Controller:
 
 ```bash
-openstack floating ip show 188.40.148.152 \
+openstack floating ip show <FLOATING_IP> \
   -c floating_ip_address \
   -c fixed_ip_address \
   -c port_id \
@@ -287,7 +287,7 @@ sudo systemctl status keepalived --no-pager
 Finally, test SSH access:
 
 ```bash
-ssh ubuntu@188.40.148.152
+ssh ubuntu@<FLOATING_IP>
 ```
 
 ---
@@ -502,7 +502,7 @@ rif-fullstack.duckdns.org
 DuckDNS
  |
  v
-188.40.148.152
+<FLOATING_IP>
 Floating IP
  |
  v
@@ -702,7 +702,7 @@ The following features have been implemented and tested:
                               INTERNET
                                   |
                                   v
-                         188.40.148.152
+                         <FLOATING_IP>
                           Floating IP
                                   |
                                   v

@@ -58,8 +58,8 @@ cp inventory.ini.example inventory.ini   # adapter la clé SSH
 ansible-galaxy collection install community.general
 ansible bastion -m ping
 # Token DuckDNS : ansible/group_vars/all/vault.yml (gitignoré) -> duckdns_token
-#   + duckdns_ip=188.40.148.152, reverse_proxy_enable_https: true, certbot_email
-#   dans group_vars/bastion.yml (HTTPS déjà actif : idempotent, changed=0)
+#   + vault_duckdns_ip et vault_certbot_email dans le même vault.yml ;
+#   group_vars/bastion.yml les référence (HTTPS déjà actif : idempotent, changed=0)
 ansible-playbook playbooks/bastion-reverse-proxy.yml
 ```
 

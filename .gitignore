@@ -64,7 +64,8 @@ desktop.ini
 # Ansible
 ###############################################################################
 
-ansible/inventory.ini
+# n'importe où dans le dépôt (terraform-bastion/ansible/inventory.ini inclus)
+**/ansible/inventory.ini
 
 ###############################################################################
 # Clés SSH

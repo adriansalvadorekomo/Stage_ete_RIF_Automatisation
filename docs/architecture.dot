@@ -13,7 +13,7 @@ digraph bastion_ha {
 
   internet [label="Internet"
             fillcolor="#E8EEF7" color="#4169E1" penwidth=2];
-  fip      [label="Floating IP\n188.40.148.152"
+  fip      [label="Floating IP\n<FLOATING_IP>"
             fillcolor="#E8EEF7" color="#4169E1" penwidth=2];
   primary  [label="PRIMARY Bastion\n192.168.100.111 · MASTER"
             fillcolor="#FDECEA" color="#EE4C2C" penwidth=2];
